@@ -7,3 +7,5 @@ To view detailed contact information: GET http://localhost:3000/contact/{id}
 
 
 (for populating data)run in terminal : node dataPopulation.js 
+
+sqlite3 database.db
