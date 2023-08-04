@@ -2,27 +2,43 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const mongoose = require('mongoose');
+const { Sequelize, DataTypes, Model } = require('sequelize');
 
 const app = express();
 const port = 3000;
 
 app.use(bodyParser.json());
 
-// Connect to MongoDB (replace 'your_mongodb_url' with your MongoDB connection string)
-mongoose.connect('mongodb://localhost:27017/your_database_name', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+// Connect to MySQL (replace 'your_mysql_url' with your MySQL connection string)
+const sequelize = new Sequelize('your_database_name', 'your_username', 'your_password', {
+  host: 'your_mysql_host',
+  dialect: 'mysql',
 });
 
-// Create a user schema and model
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-});
+// Create a user model class
+class User extends Model {}
 
-const User = mongoose.model('User', userSchema);
+User.init(
+  {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  {
+    sequelize,
+    modelName: 'User',
+  }
+);
 
 // ...
 
@@ -46,18 +62,16 @@ app.post('/register', async (req, res) => {
     // Hash the password using bcrypt
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({
+    const user = await User.create({
       name: name,
       email: email,
       password: hashedPassword,
     });
 
-    await user.save();
-
     // Generate a JWT token for the registered user
-    const token = generateToken({ id: user._id, name: user.name, email: user.email });
+    const token = generateToken({ id: user.id, name: user.name, email: user.email });
 
-    res.json({ id: user._id, name: user.name, email: user.email, token });
+    res.json({ id: user.id, name: user.name, email: user.email, token });
   } catch (err) {
     res.status(500).json({ error: 'Error during registration.' });
   }
@@ -72,7 +86,7 @@ app.post('/login', async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ where: { email: email } });
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password.' });
@@ -86,9 +100,9 @@ app.post('/login', async (req, res) => {
     }
 
     // Generate a JWT token for the logged-in user
-    const token = generateToken({ id: user._id, name: user.name, email: user.email });
+    const token = generateToken({ id: user.id, name: user.name, email: user.email });
 
-    res.json({ id: user._id, name: user.name, email: user.email, token });
+    res.json({ id: user.id, name: user.name, email: user.email, token });
   } catch (err) {
     res.status(500).json({ error: 'Error during login.' });
   }

@@ -6,6 +6,7 @@
     "faker": "^6.6.6",
     "jsonwebtoken": "^9.0.1",
     "mongoose": "^7.4.2",
+    "mysql2": "^3.6.0",
     "sqlite3": "^5.1.6"
   }
 }
