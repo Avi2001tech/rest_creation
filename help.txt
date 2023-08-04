@@ -1,0 +1,9 @@
+Now you have the endpoints to search contacts by name, phone number, and view detailed contact information based on the search results. To test these endpoints, make GET requests with the appropriate search queries:
+run in terminal :node app.js
+
+To search contacts by name: GET http://localhost:3000/search/name/{query}
+To search contacts by phone number: GET http://localhost:3000/search/phone/{query}
+To view detailed contact information: GET http://localhost:3000/contact/{id}
+
+
+(for populating data)run in terminal : node dataPopulation.js 
